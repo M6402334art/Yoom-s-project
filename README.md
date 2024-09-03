@@ -6,4 +6,4 @@
 4. install **requirements.txt** file; pip install -r requremets.txt.
 5. run app.py; python app.py
 
-##**If you cannot run because the system cannot file path, please replace a path with your path.
+##**If you cannot run because the system cannot file path, please replace a path with your path.**
