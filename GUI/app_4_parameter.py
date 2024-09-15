@@ -411,8 +411,8 @@ class MainWindow(QWidget):
             QMessageBox.critical(self, 'Notification', 'You must browse the data')
         else:
             testDf = df.iloc[:30]
-            sc = joblib.load(f'{os.getcwd()}/models/scaler_4_parameter.pkl') #change path if it not run
-            model = joblib.load(f'{os.getcwd()}/models/best_4_parameter.pkl') #change path if it not run
+            sc = joblib.load(f'{os.getcwd()}/../models/scaler_4_parameter.pkl') #change path if it not run
+            model = joblib.load(f'{os.getcwd()}/../models/best_4_parameter.pkl') #change path if it not run
             HeatDmd = [np.mean(testDf['HeatDmd'])]
             TargetTemp_Tenths = [np.mean(testDf['TargetTemp_Tenths'])]
             FlowTemp_Tenths = [np.mean(testDf['FlowTemp_Tenths'])]
@@ -443,7 +443,7 @@ class predictWindow(QWidget):
         resultText = QLabel('Result:')
         resultText.setObjectName('normal-text')
 
-        img = QPixmap(f'{os.getcwd()}/pictures/pass.png') if result == 'Pass' else QPixmap(f'{os.getcwd()}/pictures/fail.png') #change path if it not run
+        img = QPixmap(f'{os.getcwd()}/../pictures/pass.png') if result == 'Pass' else QPixmap(f'{os.getcwd()}/../pictures/fail.png') #change path if it not run
         resizedImg = img.scaled(200, 150, Qt.AspectRatioMode.KeepAspectRatio)
         labelImg = QLabel()
         labelImg.setPixmap(resizedImg)
@@ -474,7 +474,7 @@ class predictWindow(QWidget):
 app = QCoreApplication.instance()
 if app is None:
     app = QApplication([])
-    with open('E:/Yoom/GUI/styles/style.qss', 'r') as style:
+    with open(f'{os.getcwd()}/styles/style.qss', 'r') as style:
         app.setStyleSheet(style.read())
 
 window = MainWindow()
