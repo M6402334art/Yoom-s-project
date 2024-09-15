@@ -16,7 +16,7 @@ class MainWindow(QWidget):
     # main
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Machine learning analysis') # window name
+        self.setWindowTitle('Machine learning analysis for 4 parameters') # window name
         self.setFixedSize(QSize(1380, 780)) # window size
 
         # set layout
@@ -307,6 +307,7 @@ class MainWindow(QWidget):
         if filePath:
             self.filePath = filePath
             df = pd.read_csv(self.filePath)
+            df = df[df['FlowTemp_Tenths'] >= 35]
 
             # Clear previous plots
             self.ax1.clear()
@@ -410,15 +411,14 @@ class MainWindow(QWidget):
             QMessageBox.critical(self, 'Notification', 'You must browse the data')
         else:
             testDf = df.iloc[:30]
-            sc = joblib.load(f'{os.getcwd()}/models/scaler.pkl') #change path if it not run
-            model = joblib.load(f'{os.getcwd()}/models/best.pkl') #change path if it not run
+            sc = joblib.load(f'{os.getcwd()}/models/scaler_4_parameter.pkl') #change path if it not run
+            model = joblib.load(f'{os.getcwd()}/models/best_4_parameter.pkl') #change path if it not run
             HeatDmd = [np.mean(testDf['HeatDmd'])]
             TargetTemp_Tenths = [np.mean(testDf['TargetTemp_Tenths'])]
             FlowTemp_Tenths = [np.mean(testDf['FlowTemp_Tenths'])]
-            CoolDmd = [np.mean(testDf['CoolDmd'])]
             FTemp = [np.mean(testDf['FTemp'])]
             dfDic = {'HeatDmd': HeatDmd, 'TargetTemp_Tenths': TargetTemp_Tenths, 'FlowTemp_Tenths': FlowTemp_Tenths, 
-                        'CoolDmd': CoolDmd,  'FTemp': FTemp}
+                    'FTemp': FTemp}
             test = pd.DataFrame(dfDic)
             dfTestSC = sc.transform(test)
             predictionTest = model.predict(dfTestSC)
