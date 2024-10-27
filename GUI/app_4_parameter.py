@@ -1,10 +1,11 @@
 from PyQt6.QtCore import QCoreApplication, QSize, Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QFileDialog, QMessageBox, QGridLayout, QGroupBox
-from PyQt6.QtGui import QCursor, QPixmap
+from PyQt6.QtGui import QCursor, QPixmap, QIcon
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import pandas as pd
 import matplotlib.pylab as plt
 import os
+import sys
 import joblib
 import numpy as np
 
@@ -12,19 +13,31 @@ df = None
 result = None
 confidenceLevels = None
 
+if getattr(sys, 'frozen', False):
+    # If the application is frozen (i.e., running as an executable)
+    base_path = sys._MEIPASS
+
+else:
+    # If running as a script
+    base_path = os.path.dirname(__file__)
+
+
 class MainWindow(QWidget):
     # main
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Machine learning analysis for 4 parameters') # window name
-        self.setFixedSize(QSize(1380, 780)) # window size
+        iconPath = os.path.join(base_path, 'pictures', 'wd_logo2.ico')
+        icon = QIcon(iconPath)
+        self.setWindowIcon(icon)
+        # self.setFixedSize(QSize(1380, 780)) # window size
 
         # set layout
         layout = QGridLayout()
         layout.setObjectName('layout')
         layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        layout.setHorizontalSpacing(5)
-        layout.setVerticalSpacing(20)
+        layout.setHorizontalSpacing(10)
+        layout.setVerticalSpacing(10)
         self.setLayout(layout)
 
         box = QGroupBox()
@@ -50,25 +63,23 @@ class MainWindow(QWidget):
         self.plot2_created = False
         self.plot3_created = False
         self.plot4_created = False
-        self.plot5_created = False
-        self.plot6_created = False
-        self.fig1, self.ax1 = plt.subplots(figsize=(5, 2))
+        # self.plot5_created = False
+        # self.plot6_created = False
+        self.fig1, self.ax1 = plt.subplots(figsize=(8, 5))
         self.canvas1 = FigureCanvas(self.fig1)
         self.ax1_2 = self.ax1.twinx()
-        self.fig2, self.ax2 = plt.subplots(figsize=(5, 2))
+        self.fig2, self.ax2 = plt.subplots(figsize=(8, 5))
         self.canvas2 = FigureCanvas(self.fig2)
-        self.fig3, self.ax3 = plt.subplots(figsize=(5, 2))
+        self.fig3, self.ax3 = plt.subplots(figsize=(8, 5))
         self.canvas3 = FigureCanvas(self.fig3)
-        self.fig4, self.ax4 = plt.subplots(figsize=(5, 2))
+        self.fig4, self.ax4 = plt.subplots(figsize=(8, 5))
         self.canvas4 = FigureCanvas(self.fig4)
         self.ax4_2 = self.ax4.twinx()
-        # wait for existing
-        self.fig5, self.ax5 = plt.subplots(figsize=(5, 2))
-        self.canvas5 = FigureCanvas(self.fig5)
-        self.fig6, self.ax6 = plt.subplots(figsize=(5, 2))
-        self.canvas6 = FigureCanvas(self.fig6)
+        # self.fig5, self.ax5 = plt.subplots(figsize=(5, 2))
+        # self.canvas5 = FigureCanvas(self.fig5)
+        # self.fig6, self.ax6 = plt.subplots(figsize=(5, 2))
+        # self.canvas6 = FigureCanvas(self.fig6)
         self.check_and_set_black_box()
-
 
         name = QLabel('')
         ampCell = QLabel('AmpCell(amp)')
@@ -191,8 +202,7 @@ class MainWindow(QWidget):
         predictBtn.clicked.connect(self.predict)
 
         footer = QLabel('csv log analyzer BPI v11')
-        footer.setObjectName('footer-text')
-        
+        footer.setObjectName('footer-text')        
 
         # add widgets to the layout #
         # header
@@ -200,13 +210,15 @@ class MainWindow(QWidget):
         layout.addWidget(browseBtn, 0,2, alignment=Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(fileName, 0,5, alignment=Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(self.specificFileName, 0,6, alignment=Qt.AlignmentFlag.AlignLeft)
+        
         # graph
-        layout.addWidget(self.canvas1, 2, 0, 1, 3)
-        layout.addWidget(self.canvas2, 2, 3, 1, 4)
-        layout.addWidget(self.canvas3, 2, 7, 1, 4)
-        layout.addWidget(self.canvas4, 3, 0, 1, 3)
-        layout.addWidget(self.canvas5, 3, 3, 1, 4)
-        layout.addWidget(self.canvas6, 3, 7, 1, 4)
+        layout.addWidget(self.canvas1, 2, 0, 1, 5)
+        layout.addWidget(self.canvas2, 2, 5, 1, 6)
+        layout.addWidget(self.canvas3, 3, 0, 1, 5)
+        layout.addWidget(self.canvas4, 3, 5, 1, 6)
+        # layout.addWidget(self.canvas5, 3, 3, 1, 4)
+        # layout.addWidget(self.canvas6, 3, 7, 1, 4)
+
         # table
         boxLayout.addWidget(name, 0, 0, alignment=Qt.AlignmentFlag.AlignCenter)
         boxLayout.addWidget(ampCell, 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -268,9 +280,11 @@ class MainWindow(QWidget):
         boxLayout.addWidget(self.ftemp1Std, 4, 9, alignment=Qt.AlignmentFlag.AlignCenter)
         boxLayout.addWidget(self.heatDmdStd, 4, 10, alignment=Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(box, 5, 0, 5, 11)  # Spans rows 5-9 and columns 0-10
+
         # predict
         layout.addWidget(predictBtn, 10, 10, alignment=Qt.AlignmentFlag.AlignLeft)
         self.prediction = None
+        
         # footer
         layout.addWidget(footer, 11, 0 , alignment=Qt.AlignmentFlag.AlignLeft)
 
@@ -287,10 +301,10 @@ class MainWindow(QWidget):
         if not self.plot4_created:
             self.ax4.set_visible(False)
             self.ax4_2.set_visible(False)
-        if not self.plot5_created:
-            self.ax5.set_visible(False)
-        if not self.plot6_created:
-            self.ax6.set_visible(False)
+        # if not self.plot5_created:
+        #     self.ax5.set_visible(False)
+        # if not self.plot6_created:
+        #     self.ax6.set_visible(False)
 
         # Draw the canvases to reflect the changes
         self.canvas1.draw()
@@ -307,7 +321,7 @@ class MainWindow(QWidget):
         if filePath:
             self.filePath = filePath
             df = pd.read_csv(self.filePath)
-            df = df[df['FlowTemp_Tenths'] >= 35]
+            df1 = df[df['FlowTemp_Tenths'] >= 35]
 
             # Clear previous plots
             self.ax1.clear()
@@ -317,8 +331,8 @@ class MainWindow(QWidget):
             self.ax4.clear()
             self.ax4_2.clear()
 
-            self.ax1.plot(df['HeatDmd'].index, df['HeatDmd'], color='orange', label='HeatDmd')
-            self.ax1_2.plot(df['CellTotalHeater_mA'].index, df['CellTotalHeater_mA'], color='green', label='CellHeatTotal-mA')
+            self.ax1.plot(df1['HeatDmd'].index, df1['HeatDmd'], color='orange', label='HeatDmd')
+            self.ax1_2.plot(df1['CellTotalHeater_mA'].index, df1['CellTotalHeater_mA'], color='green', label='CellHeatTotal-mA')
             # self.ax1.set_ylabel('celsius')
             # self.ax1_2.set_ylabel('mAmp')
             self.ax1.set_xlabel('time (min)')
@@ -329,8 +343,8 @@ class MainWindow(QWidget):
             self.ax1.grid(linestyle='--')
             self.canvas1.draw()
 
-            self.ax2.plot(df['FTemp'].index, df['FTemp'], color='orange', label='FTemp')
-            self.ax2.plot(df['FlowTemp_Tenths'].index, df['FlowTemp_Tenths'], color='green', label='FlowTemp_Tenths')
+            self.ax2.plot(df1['FTemp'].index, df1['FTemp'], color='orange', label='FTemp')
+            self.ax2.plot(df1['FlowTemp_Tenths'].index, df1['FlowTemp_Tenths'], color='green', label='FlowTemp_Tenths')
             # self.ax2.set_ylabel('celsius')
             self.ax2.set_xlabel('time (min)')
             self.ax2.legend(loc='upper left')
@@ -338,8 +352,8 @@ class MainWindow(QWidget):
             self.ax2.grid(linestyle='--')
             self.canvas2.draw()
 
-            self.ax3.plot(df['ElectronicsFan_MeasuredRPM_2'].index, df['ElectronicsFan_MeasuredRPM_2'], color='orange', label='ElectronicsFan_MeasuredRPM_2')
-            self.ax3.plot(df['DriveFan_MeasuredRPM'].index, df['DriveFan_MeasuredRPM'], color='green', label='DriveFan_MeasuredRPM')
+            self.ax3.plot(df1['ElectronicsFan_MeasuredRPM_2'].index, df1['ElectronicsFan_MeasuredRPM_2'], color='orange', label='ElectronicsFan_MeasuredRPM_2')
+            self.ax3.plot(df1['DriveFan_MeasuredRPM'].index, df1['DriveFan_MeasuredRPM'], color='green', label='DriveFan_MeasuredRPM')
             # self.ax3.set_ylabel('RPM')
             self.ax3.set_xlabel('time (min)')
             self.ax3.legend(loc='center')
@@ -347,9 +361,9 @@ class MainWindow(QWidget):
             self.ax3.grid(linestyle='--')
             self.canvas3.draw()
 
-            self.ax4.plot(df['HeatDmd'].index, df['HeatDmd'], color='orange', label='HeatDmd')
-            self.ax4.plot(df['CoolDmd'].index, df['CoolDmd'], color='blue', label='CoolDmd')
-            self.ax4_2.plot(df['FlowTemp_Tenths'].index, df['FlowTemp_Tenths'], color='green', label='FlowTemp_Tenths')
+            self.ax4.plot(df1['HeatDmd'].index, df1['HeatDmd'], color='orange', label='HeatDmd')
+            self.ax4.plot(df1['CoolDmd'].index, df1['CoolDmd'], color='blue', label='CoolDmd')
+            self.ax4_2.plot(df1['FlowTemp_Tenths'].index, df1['FlowTemp_Tenths'], color='green', label='FlowTemp_Tenths')
             # self.ax4.set_ylabel('PWM')
             # self.ax4_2.set_ylabel('celsius')
             self.ax4.set_xlabel('time (min)')
@@ -360,49 +374,49 @@ class MainWindow(QWidget):
             self.ax4.grid(linestyle='--')
             self.canvas4.draw()
             
-            self.ampCellMax.setText('%.4f'%((df['CellTotalHeater_mA'].max())))
-            self.volts24Max.setText('%.4f'%(df['Volts24v'].max()))
-            self.cellPowerMax.setText('%.4f'%(df['CellTotalHeater_mA'].max() * df['Volts24v'].max()))
-            self.driveFanDmdMax.setText('%.4f'%(df['DriveFan_Dmd'].max()))
-            self.driveFanRpmMax.setText('%.4f'%(df['DriveFan_MeasuredRPM'].max()))
-            self.electronicFanDmdMax.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_1'].max()))
-            self.electronicFanRpmMax.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_2'].max()))
-            self.ftemp0Max.setText('%.4f'%(df['FTemp'].max()))
-            self.ftemp1Max.setText('%.4f'%(df['FlowTemp_Tenths'].max()))
-            self.heatDmdMax.setText('%.4f'%(df['HeatDmd'].max()))
+            self.ampCellMax.setText('%.2f'%((df1['CellTotalHeater_mA'].max())))
+            self.volts24Max.setText('%.2f'%(df1['Volts24v'].max()))
+            self.cellPowerMax.setText('%.2f'%(df1['CellTotalHeater_mA'].max() * df1['Volts24v'].max()))
+            self.driveFanDmdMax.setText('%.2f'%(df1['DriveFan_Dmd'].max()))
+            self.driveFanRpmMax.setText('%.2f'%(df1['DriveFan_MeasuredRPM'].max()))
+            self.electronicFanDmdMax.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_1'].max()))
+            self.electronicFanRpmMax.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_2'].max()))
+            self.ftemp0Max.setText('%.2f'%(df1['FTemp'].max()))
+            self.ftemp1Max.setText('%.2f'%(df1['FlowTemp_Tenths'].max()))
+            self.heatDmdMax.setText('%.2f'%(df1['HeatDmd'].max()))
             
-            self.ampCellMean.setText('%.4f'%((df['CellTotalHeater_mA'].mean())))
-            self.volts24Mean.setText('%.4f'%(df['Volts24v'].mean()))
-            self.cellPowerMean.setText('%.4f'%(df['CellTotalHeater_mA'].mean() * df['Volts24v'].mean()))
-            self.driveFanDmdMean.setText('%.4f'%(df['DriveFan_Dmd'].mean()))
-            self.driveFanRpmMean.setText('%.4f'%(df['DriveFan_MeasuredRPM'].mean()))
-            self.electronicFanDmdMean.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_1'].mean()))
-            self.electronicFanRpmMean.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_2'].mean()))
-            self.ftemp0Mean.setText('%.4f'%(df['FTemp'].mean()))
-            self.ftemp1Mean.setText('%.4f'%(df['FlowTemp_Tenths'].mean()))
-            self.heatDmdMean.setText('%.4f'%(df['HeatDmd'].mean()))
+            self.ampCellMean.setText('%.2f'%((df1['CellTotalHeater_mA'].mean())))
+            self.volts24Mean.setText('%.2f'%(df1['Volts24v'].mean()))
+            self.cellPowerMean.setText('%.2f'%(df1['CellTotalHeater_mA'].mean() * df1['Volts24v'].mean()))
+            self.driveFanDmdMean.setText('%.2f'%(df1['DriveFan_Dmd'].mean()))
+            self.driveFanRpmMean.setText('%.2f'%(df1['DriveFan_MeasuredRPM'].mean()))
+            self.electronicFanDmdMean.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_1'].mean()))
+            self.electronicFanRpmMean.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_2'].mean()))
+            self.ftemp0Mean.setText('%.2f'%(df1['FTemp'].mean()))
+            self.ftemp1Mean.setText('%.2f'%(df1['FlowTemp_Tenths'].mean()))
+            self.heatDmdMean.setText('%.2f'%(df1['HeatDmd'].mean()))
             
-            self.ampCellMin.setText('%.4f'%((df['CellTotalHeater_mA'].min())))
-            self.volts24Min.setText('%.4f'%(df['Volts24v'].min()))
-            self.cellPowerMin.setText('%.4f'%(df['CellTotalHeater_mA'].min() * df['Volts24v'].min()))
-            self.driveFanDmdMin.setText('%.4f'%(df['DriveFan_Dmd'].min()))
-            self.driveFanRpmMin.setText('%.4f'%(df['DriveFan_MeasuredRPM'].min()))
-            self.electronicFanDmdMin.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_1'].min()))
-            self.electronicFanRpmMin.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_2'].min()))
-            self.ftemp0Min.setText('%.4f'%(df['FTemp'].min()))
-            self.ftemp1Min.setText('%.4f'%(df['FlowTemp_Tenths'].min()))
-            self.heatDmdMin.setText('%.4f'%(df['HeatDmd'].min()))
+            self.ampCellMin.setText('%.2f'%((df1['CellTotalHeater_mA'].min())))
+            self.volts24Min.setText('%.2f'%(df1['Volts24v'].min()))
+            self.cellPowerMin.setText('%.2f'%(df1['CellTotalHeater_mA'].min() * df1['Volts24v'].min()))
+            self.driveFanDmdMin.setText('%.2f'%(df1['DriveFan_Dmd'].min()))
+            self.driveFanRpmMin.setText('%.2f'%(df1['DriveFan_MeasuredRPM'].min()))
+            self.electronicFanDmdMin.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_1'].min()))
+            self.electronicFanRpmMin.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_2'].min()))
+            self.ftemp0Min.setText('%.2f'%(df1['FTemp'].min()))
+            self.ftemp1Min.setText('%.2f'%(df1['FlowTemp_Tenths'].min()))
+            self.heatDmdMin.setText('%.2f'%(df1['HeatDmd'].min()))
             
-            self.ampCellStd.setText('%.4f'%((df['CellTotalHeater_mA'].std())))
-            self.volts24Std.setText('%.4f'%(df['Volts24v'].std()))
-            self.cellPowerStd.setText('%.4f'%(df['CellTotalHeater_mA'].std() * df['Volts24v'].std()))
-            self.driveFanDmdStd.setText('%.4f'%(df['DriveFan_Dmd'].std()))
-            self.driveFanRpmStd.setText('%.4f'%(df['DriveFan_MeasuredRPM'].std()))
-            self.electronicFanDmdStd.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_1'].std()))
-            self.electronicFanRpmStd.setText('%.4f'%(df['ElectronicsFan_MeasuredRPM_2'].std()))
-            self.ftemp0Std.setText('%.4f'%(df['FTemp'].std()))
-            self.ftemp1Std.setText('%.4f'%(df['FlowTemp_Tenths'].std()))
-            self.heatDmdStd.setText('%.4f'%(df['HeatDmd'].std()))
+            self.ampCellStd.setText('%.2f'%((df1['CellTotalHeater_mA'].std())))
+            self.volts24Std.setText('%.2f'%(df1['Volts24v'].std()))
+            self.cellPowerStd.setText('%.2f'%(df1['CellTotalHeater_mA'].std() * df1['Volts24v'].std()))
+            self.driveFanDmdStd.setText('%.2f'%(df1['DriveFan_Dmd'].std()))
+            self.driveFanRpmStd.setText('%.2f'%(df1['DriveFan_MeasuredRPM'].std()))
+            self.electronicFanDmdStd.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_1'].std()))
+            self.electronicFanRpmStd.setText('%.2f'%(df1['ElectronicsFan_MeasuredRPM_2'].std()))
+            self.ftemp0Std.setText('%.2f'%(df1['FTemp'].std()))
+            self.ftemp1Std.setText('%.2f'%(df1['FlowTemp_Tenths'].std()))
+            self.heatDmdStd.setText('%.2f'%(df1['HeatDmd'].std()))
 
     # prediction
     def predict(self):
@@ -411,8 +425,13 @@ class MainWindow(QWidget):
             QMessageBox.critical(self, 'Notification', 'You must browse the data')
         else:
             testDf = df.iloc[:30]
-            sc = joblib.load(f'{os.getcwd()}/../models/scaler_4_parameter.pkl') #change path if it not run
-            model = joblib.load(f'{os.getcwd()}/../models/best_4_parameter.pkl') #change path if it not run
+            testDf = testDf[testDf['FlowTemp_Tenths'] >= 35]
+
+            scaler_path = os.path.join(base_path, 'models', 'scaler_4_parameter.pkl')
+            model_path = os.path.join(base_path, 'models', 'best_4_parameter.pkl')
+
+            sc = joblib.load(scaler_path) #change path if it not run
+            model = joblib.load(model_path) #change path if it not run
             HeatDmd = [np.mean(testDf['HeatDmd'])]
             TargetTemp_Tenths = [np.mean(testDf['TargetTemp_Tenths'])]
             FlowTemp_Tenths = [np.mean(testDf['FlowTemp_Tenths'])]
@@ -443,7 +462,8 @@ class predictWindow(QWidget):
         resultText = QLabel('Result:')
         resultText.setObjectName('normal-text')
 
-        img = QPixmap(f'{os.getcwd()}/../pictures/pass.png') if result == 'Pass' else QPixmap(f'{os.getcwd()}/../pictures/fail.png') #change path if it not run
+        img_path = os.path.join(base_path, 'pictures', 'pass.png') if result == 'Pass' else os.path.join(base_path, 'pictures', 'fail.png')
+        img = QPixmap(img_path)#change path if it not run
         resizedImg = img.scaled(200, 150, Qt.AspectRatioMode.KeepAspectRatio)
         labelImg = QLabel()
         labelImg.setPixmap(resizedImg)
@@ -452,8 +472,14 @@ class predictWindow(QWidget):
         confidenceText = QLabel('Confidence Level:')
         confidenceText.setObjectName('normal-text')
 
-        confidence = QLabel('%.4f'%(confidenceLevels.max(axis=1)[0]))
+        maxConfidence = round(confidenceLevels.max(axis=1)[0] * 100, 2)
+        confidence = QLabel(f'{maxConfidence} %')
         confidence.setObjectName('bold-text')
+
+        if maxConfidence >= 80:
+            confidence.setObjectName('confidence-high')
+        else :
+            confidence.setObjectName('confidence-low')
 
         closeBtn = QPushButton('Close')
         closeBtn.setFixedSize(74, 25)
@@ -474,7 +500,8 @@ class predictWindow(QWidget):
 app = QCoreApplication.instance()
 if app is None:
     app = QApplication([])
-    with open(f'{os.getcwd()}/styles/style.qss', 'r') as style:
+    stylesheet_path = os.path.join(base_path, 'styles', 'style.qss')
+    with open(stylesheet_path, 'r') as style:
         app.setStyleSheet(style.read())
 
 window = MainWindow()

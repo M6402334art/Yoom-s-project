@@ -14,3 +14,13 @@
 #footer-text{
     font-size: 12px;
 }
+#confidence-high{
+    color: #548235;
+    font-weight: bold;
+    font-size: 24px;
+}
+#confidence-low{
+    color: #C00000;
+    font-weight: bold;
+    font-size: 24px;
+}
