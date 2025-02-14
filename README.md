@@ -7,3 +7,5 @@
 5. run app.py; python app.py
 
 ***If you cannot run because the system cannot file path, please replace a path with your path.***
+
+This project is create ML and use it by GUI (PyQt)
